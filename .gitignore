@@ -1,0 +1,12 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Game generated files
+*_puzzle.txt
+*_solution.txt
+*_grid.txt
+
+# IDE files
+.vscode/
+*.code-workspace

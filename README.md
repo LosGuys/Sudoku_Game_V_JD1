@@ -1,39 +1,64 @@
 # Sudoku Game
 
-A Python-based Sudoku game with a graphical interface built using Tkinter. The game includes 100 pre-generated puzzles and features a user-friendly interface.
+A Python-based Sudoku game with a graphical interface using Tkinter. Features multiple difficulty levels, dynamic puzzle generation, and real-time feedback.
 
 ## Features
 
-- Interactive Sudoku board
-- 100 unique pre-generated puzzles
-- Input validation
-- Solution checking
-- New game functionality
+- Four difficulty levels (Debug, Easy, Medium, Hard)
+- Dynamic puzzle generation using advanced algorithms
+- Real-time input validation
+- Partial solution checking with visual feedback
+- Tab navigation between cells
+- Multi-threaded puzzle generation for responsiveness
+- Status updates and progress tracking
 - Clean and intuitive interface
 
 ## Requirements
 
 - Python 3.x
 - Tkinter (included in standard Python installation)
+- NumPy
 
 ## How to Run
 
-1. Ensure Python is installed on your system
-2. Run the game by executing:
-   ```
-   python main.py
-   ```
-
-## How to Play
-
-1. Click "New Game" to start a new puzzle
-2. Click on any empty cell to input a number (1-9)
-3. Use "Check Solution" to verify your answer
-4. The game will notify you when the solution is correct
+```bash
+python main.py
+```
 
 ## Game Controls
 
-- Left-click on a cell to select it
-- Type numbers 1-9 to fill cells
-- Invalid inputs are automatically rejected
-- Original puzzle numbers cannot be modified
+- Use numbers 1-9 to fill cells
+- Tab key to navigate between cells
+- "Partial Check" to validate current progress (with color feedback)
+- "Check Solution" to verify completed puzzle
+- "New Game" to generate a fresh puzzle
+- Select difficulty from the dropdown menu
+
+## Difficulty Levels
+
+- Debug: Only one number removed (for testing)
+- Easy: ~40 numbers to fill
+- Medium: ~50 numbers to fill
+- Hard: ~60 numbers to fill
+
+## Advanced Features
+
+- Multi-threaded puzzle generation for better UI responsiveness
+- Unique solution guarantee for all puzzles
+- Real-time feedback with cell highlighting:
+  - Light gray: Original puzzle numbers
+  - Light green: Correct user inputs
+  - Pink: Incorrect user inputs
+  - White: Empty cells
+
+## Development
+
+The game uses a sophisticated puzzle generation algorithm that ensures:
+- Each puzzle has exactly one solution
+- Appropriate difficulty based on selected level
+- Efficient generation using backtracking and optimization
+- Multi-threading for responsive UI
+
+## Author
+
+losguys (2025)
