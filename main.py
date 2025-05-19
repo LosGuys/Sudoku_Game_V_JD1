@@ -68,170 +68,48 @@ class SudokuGUI:
         if hasattr(self, 'board_frame'):
             self.board_frame.destroy()
 
-        self.board_frame = tk.Frame(self.root)
-        self.board_frame.pack(padx=20, pady=20)  # Increased padding
+        self.board_frame = tk.Frame(self.root)  # White background
+        self.board_frame.pack(padx=20, pady=20)
 
-        for i in range(9):
-            for j in range(9):
-                cell_frame = tk.Frame(
+        # Create internal frames for 3x3 blocks with borders
+        for block_i in range(3):
+            for block_j in range(3):
+                block_frame = tk.Frame(
                     self.board_frame,
-                    borderwidth=1,
-                    relief="solid",
-                    width=50,  # Fixed width
-                    height=50,  # Fixed height
+                    borderwidth=2,  # Thicker border for 3x3 blocks
+                    relief="solid"
                 )
-                cell_frame.grid(row=i, column=j, padx=1, pady=1)
-                cell_frame.grid_propagate(False)  # Maintain fixed size
+                block_frame.grid(row=block_i, column=block_j, padx=1, pady=1)
 
-                cell = tk.Entry(
-                    cell_frame,
-                    width=2,
-                    font=('Arial', 24),  # Larger font
-                    justify='center',
-                    bg='white'  # White background
-                )
-                cell.place(relx=0.5, rely=0.5, anchor='center')  # Center in frame
+                # Create cells within each 3x3 block
+                for i in range(3):
+                    for j in range(3):
+                        cell_frame = tk.Frame(
+                            block_frame,
+                            borderwidth=1,
+                            relief="solid",
+                            width=50,
+                            height=50
+                        )
+                        cell_frame.grid(row=i, column=j, padx=1, pady=1)
+                        cell_frame.grid_propagate(False)
 
-                # Add thicker borders for 3x3 boxes
-                if i % 3 == 0 and i != 0:
-                    cell_frame.grid(pady=(3, 1))
-                if j % 3 == 0 and j != 0:
-                    cell_frame.grid(padx=(3, 1))
+                        cell = tk.Entry(
+                            cell_frame,
+                            width=2,
+                            font=('Arial', 24),
+                            justify='center',
+                            bg='white'
+                        )
+                        cell.place(relx=0.5, rely=0.5, anchor='center')
 
-                # Bind both keypress and keyrelease for better input control
-                cell.bind('<KeyPress>', lambda e, i=i, j=j: self.validate_input(e, i, j))
-                cell.bind('<KeyRelease>', lambda e, i=i, j=j: self.post_validate_input(e, i, j))
-                self.cells[(i, j)] = cell
-
-    def validate_input(self, event, i, j):
-        """Pre-validate input before it's entered"""
-        if event.char:
-            # Only allow digits 1-9
-            if not event.char.isdigit() or event.char == '0':
-                return "break"
-            # Clear existing content and allow new input
-            if self.cells[(i, j)].get():
-                self.cells[(i, j)].delete(0, tk.END)
-        return None
-
-    def post_validate_input(self, event, i, j):
-        """Clean up input after it's entered"""
-        cell = self.cells[(i, j)]
-        value = cell.get()
-        
-        # Handle backspace/delete
-        if not value:
-            return
-            
-        # Ensure single digit 1-9
-        if not value.isdigit() or int(value) < 1 or int(value) > 9:
-            cell.delete(0, tk.END)
-            return
-            
-        # Ensure only one digit
-        if len(value) > 1:
-            cell.delete(1, tk.END)
-
-    def load_new_puzzle(self):
-        if self.loading:
-            return
-        
-        self.loading = True
-        self.new_game_btn.config(state='disabled')
-        self.loading_label.pack(side=tk.LEFT, padx=5)
-        self.status_label.config(text="")  # Clear status when starting new game
-        
-        def generate():
-            # Generate new puzzle with selected difficulty
-            difficulty = self.difficulty_var.get()
-            puzzle, solution = generate_puzzle(difficulty)
-            
-            # Save to files in background
-            with open(f"{difficulty}_puzzle.txt", "w") as puzzle_file:
-                for row in puzzle:
-                    puzzle_file.write(" ".join(map(str, row)) + "\n")
-
-            with open(f"{difficulty}_solution.txt", "w") as solution_file:
-                for row in solution:
-                    solution_file.write(" ".join(map(str, row)) + "\n")
-            
-            # Update UI in main thread
-            self.root.after(0, lambda: self.update_board(puzzle, solution))
-        
-        # Start generation in separate thread
-        thread = threading.Thread(target=generate)
-        thread.daemon = True  # Thread will close when main program exits
-        thread.start()
-    
-    def update_board(self, puzzle, solution):
-        """Update the board with a new puzzle (called in main thread)"""
-        self.current_puzzle = puzzle
-        self.solution = solution
-        
-        # Recreate the board with new puzzle
-        self.create_board()
-        
-        # Fill the board
-        for i in range(9):
-            for j in range(9):
-                value = puzzle[i][j]
-                cell = self.cells[(i, j)]
-                if value != 0:
-                    cell.insert(0, str(value))
-                    cell.config(bg='lightgray')
-        
-        # Re-enable new game button and hide loading label
-        self.loading = False
-        self.new_game_btn.config(state='normal')
-        self.loading_label.pack_forget()
-        
-        # Setup tab navigation
-        for i in range(9):
-            for j in range(9):
-                cell = self.cells[(i, j)]
-                next_i, next_j = (i, j + 1) if j < 8 else (i + 1, 0)
-                if next_i < 9:
-                    cell.bind('<Tab>', lambda e, ni=next_i, nj=next_j: self.focus_next_cell(ni, nj))
-
-    def create_board(self):
-        # Clear only the board frame before creating a new board
-        if hasattr(self, 'board_frame'):
-            self.board_frame.destroy()
-
-        self.board_frame = tk.Frame(self.root)
-        self.board_frame.pack(padx=20, pady=20)  # Increased padding
-
-        for i in range(9):
-            for j in range(9):
-                cell_frame = tk.Frame(
-                    self.board_frame,
-                    borderwidth=1,
-                    relief="solid",
-                    width=50,  # Fixed width
-                    height=50,  # Fixed height
-                )
-                cell_frame.grid(row=i, column=j, padx=1, pady=1)
-                cell_frame.grid_propagate(False)  # Maintain fixed size
-
-                cell = tk.Entry(
-                    cell_frame,
-                    width=2,
-                    font=('Arial', 24),  # Larger font
-                    justify='center',
-                    bg='white'  # White background
-                )
-                cell.place(relx=0.5, rely=0.5, anchor='center')  # Center in frame
-
-                # Add thicker borders for 3x3 boxes
-                if i % 3 == 0 and i != 0:
-                    cell_frame.grid(pady=(3, 1))
-                if j % 3 == 0 and j != 0:
-                    cell_frame.grid(padx=(3, 1))
-
-                # Bind both keypress and keyrelease for better input control
-                cell.bind('<KeyPress>', lambda e, i=i, j=j: self.validate_input(e, i, j))
-                cell.bind('<KeyRelease>', lambda e, i=i, j=j: self.post_validate_input(e, i, j))
-                self.cells[(i, j)] = cell
+                        # Calculate the actual cell position in the 9x9 grid
+                        global_i = block_i * 3 + i
+                        global_j = block_j * 3 + j
+                        
+                        cell.bind('<KeyPress>', lambda e, i=global_i, j=global_j: self.validate_input(e, i, j))
+                        cell.bind('<KeyRelease>', lambda e, i=global_i, j=global_j: self.post_validate_input(e, i, j))
+                        self.cells[(global_i, global_j)] = cell
 
     def validate_input(self, event, i, j):
         """Pre-validate input before it's entered"""

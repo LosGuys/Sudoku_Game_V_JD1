@@ -1,0 +1,127 @@
+import random
+import copy
+
+N = 9        # size of the grid
+SRN = 3      # size of the subgrid
+
+def is_safe(grid, row, col, num):
+    # Check row, column, and box
+    if num in grid[row]:
+        return False
+    if any(grid[r][col] == num for r in range(N)):
+        return False
+    start_r, start_c = row - row % SRN, col - col % SRN
+    for r in range(start_r, start_r + SRN):
+        for c in range(start_c, start_c + SRN):
+            if grid[r][c] == num:
+                return False
+    return True
+
+def solve(grid):
+    # Classic backtracking solver
+    for row in range(N):
+        for col in range(N):
+            if grid[row][col] == 0:
+                for num in range(1, N+1):
+                    if is_safe(grid, row, col, num):
+                        grid[row][col] = num
+                        if solve(grid):
+                            return True
+                        grid[row][col] = 0
+                return False
+    return True
+
+def fill_box(grid, row_start, col_start):
+    nums = list(range(1, N+1))
+    random.shuffle(nums)
+    for i in range(SRN):
+        for j in range(SRN):
+            grid[row_start + i][col_start + j] = nums.pop()
+
+def fill_diagonal(grid):
+    for i in range(0, N, SRN):
+        fill_box(grid, i, i)
+
+def fill_remaining(grid, i=0, j=SRN):
+    # Recursive fill for non-diagonal boxes
+    if j >= N and i < N - 1:
+        i += 1
+        j = 0
+    if i >= N and j >= N:
+        return True
+    if i < SRN:
+        if j < SRN:
+            j = SRN
+    elif i < N - SRN:
+        if j == int(i/SRN)*SRN:
+            j += SRN
+    else:
+        if j == N - SRN:
+            i += 1
+            j = 0
+            if i >= N:
+                return True
+
+    for num in range(1, N+1):
+        if is_safe(grid, i, j, num):
+            grid[i][j] = num
+            if fill_remaining(grid, i, j+1):
+                return True
+            grid[i][j] = 0
+    return False
+
+def generate_full_solution():
+    grid = [[0]*N for _ in range(N)]
+    fill_diagonal(grid)
+    fill_remaining(grid)
+    return grid
+
+def count_solutions(grid):
+    # Stop after finding 2 solutions
+    def backtrack(count=0):
+        for r in range(N):
+            for c in range(N):
+                if grid[r][c] == 0:
+                    for num in range(1, N+1):
+                        if is_safe(grid, r, c, num):
+                            grid[r][c] = num
+                            count = backtrack(count)
+                            if count >= 2:
+                                return count
+                            grid[r][c] = 0
+                    return count
+        return count + 1
+    # work on a copy
+    return backtrack.__wrapped__(copy.deepcopy(grid), 0) if hasattr(backtrack, "__wrapped__") else backtrack()
+
+def dig_holes(grid, attempts=5):
+    # attempts = how many times to try removing before giving up
+    while attempts > 0:
+        row = random.randrange(N)
+        col = random.randrange(N)
+        if grid[row][col] != 0:
+            backup = grid[row][col]
+            grid[row][col] = 0
+
+            grid_copy = copy.deepcopy(grid)
+            solutions = count_solutions(grid_copy)
+            if solutions != 1:
+                grid[row][col] = backup
+                attempts -= 1
+    return grid
+
+def generate_sudoku(attempts=5):
+    """Return a puzzle (0 = blank) and its solution."""
+    solution = generate_full_solution()
+    puzzle = copy.deepcopy(solution)
+    puzzle = dig_holes(puzzle, attempts)
+    return puzzle, solution
+
+if __name__ == "__main__":
+    puzzle, solution = generate_sudoku(attempts=10)
+    print("Puzzle:")
+    for row in puzzle:
+        print(row)
+    print("\nSolution:")
+    for row in solution:
+        print(row)

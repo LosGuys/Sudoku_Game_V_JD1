@@ -2,6 +2,20 @@
 
 A Python-based Sudoku game with a graphical interface using Tkinter. Features multiple difficulty levels, dynamic puzzle generation, and real-time feedback.
 
+## Installation
+
+1. Clone the repository
+2. Create a virtual environment:
+```powershell
+python -m venv sudoku_env
+.\sudoku_env\Scripts\Activate.ps1
+```
+
+3. Install required packages:
+```powershell
+pip install -r requirements.txt
+```
+
 ## Features
 
 - Four difficulty levels (Debug, Easy, Medium, Hard)

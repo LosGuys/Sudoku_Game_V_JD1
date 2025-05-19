@@ -10,3 +10,11 @@ __pycache__/
 # IDE files
 .vscode/
 *.code-workspace
+
+# PyInstaller files
+build/
+dist/
+*.spec
+
+# Virtual Environment
+sudoku_env/
